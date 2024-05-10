@@ -2,18 +2,21 @@ import { NextResponse } from "next/server";
 import User from "../../../models/user.model.js"
 import { connectMongoDB } from "@/db/db.js";
 import { generarCodigoAlfanumerico } from "@/utils/alias.js";
+import bcrypt from "bcryptjs"
 
 export async function POST ( request ) {
     connectMongoDB()
     const numeroAleatorio = Math.floor(Math.random() * 1000000) + 1
     
     try {
-        const { nombre , email , password ,dni , telefono, cvu} = await request.json()
+       const { nombre , email , password ,dni , telefono } = await request.json()
 
-        const newUser = new User({
+       const passwordHash = await bcrypt.hash( password , 12 )
+
+       const newUser = new User({
             nombre,
             email,
-            password,
+            password : passwordHash ,
             dni,
             telefono,
             cvu : numeroAleatorio ,
@@ -22,7 +25,13 @@ export async function POST ( request ) {
 
         const userSaved = await newUser.save()
         console.log( newUser )    
-        return NextResponse.json(userSaved)
+        return NextResponse.json({
+            id: userSaved._id,
+            nombre : userSaved.nombre,
+            email : userSaved. email,
+            createdAt : userSaved.createdAt,
+            updatedAt: userSaved.updatedAt
+        })
     } catch (error) {
         console.log( error )
         return NextResponse.json( error.errmsg )
