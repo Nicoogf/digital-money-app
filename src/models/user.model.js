@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema , models , model } from "mongoose";
 
 const userSchema = new Schema({
     nombre : {
@@ -33,8 +33,11 @@ const userSchema = new Schema({
     billetera: {
         type : String
     },
+},{
+    timestamps : true 
 })
 
-export default mongoose.model("User" , userSchema)
 
+const User = models.User || model("User" , userSchema)
+export default User ;
 
